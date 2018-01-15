@@ -26,6 +26,8 @@ class Net(nn.Module):
 
 
 def main(cuda):
+    torch.backends.cudnn.benchmark = True
+
     dataset = torchvision.datasets.MNIST('../data', train=True, download=True,
                                           transform=torchvision.transforms.Compose([
                                               torchvision.transforms.ToTensor(),
