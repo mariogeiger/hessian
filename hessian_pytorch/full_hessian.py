@@ -9,7 +9,7 @@ def list_dot(a, b):
     return sum([torch.sum(x * y) for x, y in zip(a, b)])
 
 
-def list_like(flat, lst):
+def split_like(flat, lst):
     a = []
     i = 0
     for element in lst:
@@ -31,7 +31,7 @@ def full_hessian(fun, loader, parameters):
     '''
 
     def hessian_vector_product(vector):
-        vector = list_like(vector, parameters)
+        vector = split_like(vector, parameters)
 
         # zero_grad
         for p in parameters:
@@ -41,6 +41,7 @@ def full_hessian(fun, loader, parameters):
         for batch in loader:
             grad = torch.autograd.grad(fun(batch), parameters, create_graph=True)
             list_dot(grad, [torch.autograd.Variable(x) for x in vector]).backward()
+            del grad
 
         result = [p.grad.data for p in parameters]
         return list_flatten(result)
@@ -50,6 +51,7 @@ def full_hessian(fun, loader, parameters):
     hessian = torch.FloatTensor(n, n)
     hot_vector = torch.zeros(n)
     if next(iter(parameters)).is_cuda:
+        hessian = hessian.cuda()
         hot_vector = hot_vector.cuda()
 
     for i in range(n):
