@@ -26,7 +26,7 @@ class Net(nn.Module):
 
 
 def train(model, dataset):
-    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True, num_workers=1, pin_memory=True)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
@@ -51,7 +51,7 @@ def train(model, dataset):
 
 
 def test(model, dataset):
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=True)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=torch.cuda.is_available())
 
     model.eval()
     loss = 0
@@ -80,7 +80,7 @@ def compute_hessian(model, dataset):
         loss = F.nll_loss(output, target, size_average=False) / len(dataset)
         return loss
 
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=True)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=torch.cuda.is_available())
     parameters = [p for p in model.parameters() if p.requires_grad]
     hessian = full_hessian(loss_function, loader, parameters)
 

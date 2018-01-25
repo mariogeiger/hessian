@@ -34,7 +34,7 @@ def main(cuda):
                                               torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                           ]))
 
-    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True, num_workers=1, pin_memory=True)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True, num_workers=1, pin_memory=cuda)
 
     model = Net()
     if cuda:
@@ -62,7 +62,7 @@ def main(cuda):
         train(epoch)
 
 
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=True)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=cuda)
 
     def loss_function(batch):
         model.eval()  # disable dropout
