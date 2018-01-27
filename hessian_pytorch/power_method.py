@@ -49,16 +49,6 @@ def power_method(fun, loader, parameters, orthogonals, offset=0, target_overlap=
             vector = list_sub(vector, [dot * x for x in orthogonal])
         return vector
 
-    def eigenvalue(vector, lam_vector):
-        lam_vector_flat = list_flatten(lam_vector)
-        vector_flat = list_flatten(vector)
-
-        i_max = torch.max(torch.abs(lam_vector_flat), dim=0)[1]
-        lam = lam_vector_flat[i_max] / vector_flat[i_max]
-        lam = float(lam.cpu().numpy())
-        lam = lam - offset
-        return lam
-
     vector = project(vector)
 
     for niter in range(max_iter):
@@ -78,7 +68,7 @@ def power_method(fun, loader, parameters, orthogonals, offset=0, target_overlap=
         lam_vector = project(lam_vector)
 
         # eigenvalue
-        lam = eigenvalue(vector, lam_vector)
+        lam = list_dot(vector, lam_vector) / list_dot(vector, vector) - offset
 
         # overlap
         new_vector = list_normalize(lam_vector)
