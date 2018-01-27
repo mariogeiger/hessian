@@ -27,7 +27,10 @@ def full_hessian(fun, loader, parameters):
             for batch in loader:
                 grad = torch.autograd.grad(fun(batch), param, create_graph=True)[0]
                 grad = torch.autograd.grad(grad.view(-1)[i], parameters[j:])
-                row = [x + y.data for x, y in zip(row, grad)]
+                for x, y in zip(row, grad):
+                    x += y.data
+                    del y
+                del grad
 
             row = torch.cat([x.view(-1) for x in row])
             hessian[ii + i, ii:] = row
