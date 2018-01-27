@@ -69,20 +69,31 @@ def test(model, dataset):
 
 
 def compute_hessian(model, dataset):
-    def loss_function(batch):
-        model.eval()  # disable dropout
-        data, target = batch
+    loader = torch.utils.data.DataLoader(dataset, batch_size=2000, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
+
+    parameters = [p for p in model.parameters() if p.requires_grad]
+    n = sum(p.numel() for p in parameters)
+
+    if torch.cuda.is_available():
+        hessian = torch.cuda.FloatTensor(n, n).fill_(0)
+    else:
+        hessian = torch.FloatTensor(n, n).fill_(0)
+
+    for i, (data, target) in enumerate(loader):
+        if i >= 2:
+            break
+
+
         if torch.cuda.is_available():
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
 
         output = model(data)
         loss = F.nll_loss(output, target, size_average=False) / len(dataset)
-        return loss
 
-    loader = torch.utils.data.DataLoader(dataset, batch_size=1000, shuffle=False, num_workers=1, pin_memory=torch.cuda.is_available())
-    parameters = [p for p in model.parameters() if p.requires_grad]
-    hessian = full_hessian(loss_function, loader, parameters)
+        hessian += full_hessian(loss, parameters)
+        print('{}/{}    '.format(i, len(loader)), end='\r')
+
 
     evalues, evectors = np.linalg.eigh(hessian.cpu().numpy())
     print(evalues[-20:])

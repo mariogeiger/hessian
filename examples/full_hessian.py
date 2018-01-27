@@ -11,7 +11,7 @@ def main(cuda):
 
     x = Variable(x, requires_grad=True)
 
-    hessian = full_hessian(lambda _: torch.sum(x ** 2), [None], [x])
+    hessian = full_hessian(torch.sum(x ** 2), [x])
     evalues, evectors = np.linalg.eigh(hessian.cpu().numpy())
 
     print(evalues)
