@@ -9,13 +9,8 @@ def hessian(output, inputs):
     '''
     Compute the Hessian of `output` with respect to `inputs`
     '''
-    if inputs[0].is_cuda:
-        Tensor = torch.cuda.FloatTensor
-    else:
-        Tensor = torch.FloatTensor
-
     n = sum(p.numel() for p in inputs)
-    hess = Tensor(n, n).fill_(0)
+    hess = (torch.cuda.FloatTensor if output.is_cuda else torch.FloatTensor)(n, n).fill_(0)
 
     ai = 0
     for i, param in enumerate(inputs):
