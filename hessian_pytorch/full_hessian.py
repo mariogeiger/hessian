@@ -11,32 +11,29 @@ def full_hessian(fun, loader, parameters):
 
     FUN = sum of fun(batch) for batch in loader
     '''
-    if next(iter(parameters)).is_cuda:
+    if parameters[0].is_cuda:
         Tensor = torch.cuda.FloatTensor
     else:
         Tensor = torch.FloatTensor
 
     n = sum(p.numel() for p in parameters)
-    hessian = Tensor(n, n)
+    hessian = Tensor(n, n).fill_(0)
 
-    ii = 0
-    for j, param in enumerate(parameters):
-        for i in range(param.numel()):
-            row = [Tensor(p.size()).fill_(0) for p in parameters[j:]]
+    for batch in loader:
+        ai = 0
+        for i, param in enumerate(parameters):
+            grad = torch.autograd.grad(fun(batch), param, create_graph=True)
+            grad = grad[0].contiguous().view(-1)
 
-            for batch in loader:
-                grad = torch.autograd.grad(fun(batch), param, create_graph=True)[0]
-                grad = torch.autograd.grad(grad.view(-1)[i], parameters[j:])
-                for x, y in zip(row, grad):
-                    x += y.data
-                    del y
-                del grad
+            for j in range(param.numel()):
+                row = torch.autograd.grad(grad[j], parameters[i:], retain_graph=True)
+                row = torch.cat([x.data.contiguous().view(-1) for x in row])[j:]
 
-            row = torch.cat([x.view(-1) for x in row])
-            hessian[ii + i, ii:] = row
-            hessian[ii:, ii + i] = row
-            print("{}/{}      ".format(ii + i, n), end='\r')
-
-        ii += param.numel()
+                hessian[ai, ai:] += row
+                if ai + 1 < n:
+                    hessian[ai + 1:, ai] += row[1:]
+                del row
+                ai += 1
+            del grad
 
     return hessian
