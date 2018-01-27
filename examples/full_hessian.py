@@ -1,7 +1,7 @@
 #pylint: disable=C, E1101
 import torch
 from torch.autograd import Variable
-from hessian_pytorch import full_hessian
+import hessian_pytorch
 import numpy as np
 
 def main(cuda):
@@ -11,7 +11,7 @@ def main(cuda):
 
     x = Variable(x, requires_grad=True)
 
-    hessian = full_hessian(torch.sum(x ** 2), [x])
+    hessian = hessian_pytorch.hessian(torch.sum(x ** 2), [x])
     evalues, evectors = np.linalg.eigh(hessian.cpu().numpy())
 
     print(evalues)

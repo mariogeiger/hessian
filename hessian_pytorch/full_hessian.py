@@ -1,11 +1,11 @@
 # pylint: disable=E1101, C0103, C0111
 '''
-Highest eigenvalues and eigenvectors using the power method
+Computes the Hessian
 '''
 import torch
 
 
-def full_hessian(output, parameters):
+def hessian(output, parameters):
     '''
     Compute the Hessian of `output` with respect to `parameters`
     '''
@@ -15,7 +15,7 @@ def full_hessian(output, parameters):
         Tensor = torch.FloatTensor
 
     n = sum(p.numel() for p in parameters)
-    hessian = Tensor(n, n).fill_(0)
+    hess = Tensor(n, n).fill_(0)
 
     ai = 0
     for i, param in enumerate(parameters):
@@ -26,11 +26,11 @@ def full_hessian(output, parameters):
             row = torch.autograd.grad(grad[j], parameters[i:], retain_graph=True)
             row = torch.cat([x.data.contiguous().view(-1) for x in row])[j:]
 
-            hessian[ai, ai:] += row
+            hess[ai, ai:] += row
             if ai + 1 < n:
-                hessian[ai + 1:, ai] += row[1:]
+                hess[ai + 1:, ai] += row[1:]
             del row
             ai += 1
         del grad
 
-    return hessian
+    return hess

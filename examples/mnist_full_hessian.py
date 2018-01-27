@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from torch.autograd import Variable
-from hessian_pytorch import full_hessian
+import hessian_pytorch
 import numpy as np
 
 
@@ -91,7 +91,7 @@ def compute_hessian(model, dataset):
         output = model(data)
         loss = F.nll_loss(output, target, size_average=False) / len(dataset)
 
-        hessian += full_hessian(loss, parameters)
+        hessian += hessian_pytorch.hessian(loss, parameters)
         print('{}/{}    '.format(i, len(loader)), end='\r')
 
 
