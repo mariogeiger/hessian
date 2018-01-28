@@ -91,7 +91,7 @@ def compute_hessian(model, dataset):
         output = model(data)
         loss = F.nll_loss(output, target, size_average=False) / len(dataset)
 
-        hessian += hessian_pytorch.hessian(loss, parameters)
+        hessian_pytorch.hessian(loss, parameters, hess=hessian)
         print('{}/{}    '.format(i, len(loader)), end='\r')
 
 
