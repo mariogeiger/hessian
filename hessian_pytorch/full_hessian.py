@@ -14,11 +14,11 @@ def hessian(output, inputs, hess=None):
         hess = (torch.cuda.FloatTensor if output.is_cuda else torch.FloatTensor)(n, n).fill_(0)
 
     ai = 0
-    for i, param in enumerate(inputs):
-        grad = torch.autograd.grad(output, param, create_graph=True)
+    for i, inp in enumerate(inputs):
+        grad = torch.autograd.grad(output, inp, create_graph=True)
         grad = grad[0].contiguous().view(-1)
 
-        for j in range(param.numel()):
+        for j in range(inp.numel()):
             row = torch.autograd.grad(grad[j], inputs[i:], retain_graph=True)
             row = torch.cat([x.data.contiguous().view(-1) for x in row])[j:]
 
