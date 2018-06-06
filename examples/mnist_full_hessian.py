@@ -1,9 +1,8 @@
-# pylint: disable = C, R
+# pylint: disable = C, R, E1101
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-from torch.autograd import Variable
 import hessian_pytorch
 import numpy as np
 
@@ -35,7 +34,6 @@ def train(model, dataset):
         for batch_idx, (data, target) in enumerate(loader):
             if torch.cuda.is_available():
                 data, target = data.cuda(), target.cuda()
-            data, target = Variable(data), Variable(target)
             optimizer.zero_grad()
             output = model(data)
             loss = F.nll_loss(output, target)
@@ -44,9 +42,9 @@ def train(model, dataset):
             if batch_idx % 50 == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(loader.dataset),
-                    100. * batch_idx / len(loader), loss.data[0]))
+                    100. * batch_idx / len(loader), loss.item()))
 
-    for epoch in range(1, 5 + 1):
+    for epoch in range(1, 2 + 1):
         make_epoch(epoch)
 
 
@@ -56,14 +54,14 @@ def test(model, dataset):
     model.eval()
     loss = 0
     correct = 0
-    for data, target in loader:
-        if torch.cuda.is_available():
-            data, target = data.cuda(), target.cuda()
-        data, target = torch.autograd.Variable(data, volatile=True), torch.autograd.Variable(target)
-        output = model(data)
-        loss += torch.nn.functional.nll_loss(output, target, size_average=False).data[0]  # sum up batch loss
-        pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+    with torch.no_grad():
+        for data, target in loader:
+            if torch.cuda.is_available():
+                data, target = data.cuda(), target.cuda()
+            output = model(data)
+            loss += F.nll_loss(output, target, size_average=False).item()  # sum up batch loss
+            pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
+            correct += pred.eq(target.view_as(pred)).sum().item()
 
     print("accuracy = {}".format(correct / len(loader.dataset)))
 
@@ -74,19 +72,14 @@ def compute_hessian(model, dataset):
     parameters = [p for p in model.parameters() if p.requires_grad]
     n = sum(p.numel() for p in parameters)
 
-    if torch.cuda.is_available():
-        hessian = torch.cuda.FloatTensor(n, n).fill_(0)
-    else:
-        hessian = torch.FloatTensor(n, n).fill_(0)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    hessian = torch.zeros(n, n, device=device)
 
     for i, (data, target) in enumerate(loader):
-        if i >= 2:
+        if i >= 2:  # TODO remove
             break
 
-
-        if torch.cuda.is_available():
-            data, target = data.cuda(), target.cuda()
-        data, target = Variable(data), Variable(target)
+        data, target = data.to(device), target.to(device)
 
         output = model(data)
         loss = F.nll_loss(output, target, size_average=False) / len(dataset)

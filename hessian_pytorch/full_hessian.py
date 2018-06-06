@@ -11,7 +11,7 @@ def hessian(output, inputs, hess=None):
     '''
     n = sum(p.numel() for p in inputs)
     if hess is None:
-        hess = (torch.cuda.FloatTensor if output.is_cuda else torch.FloatTensor)(n, n).fill_(0)
+        hess = output.new_zeros(n, n)
 
     ai = 0
     for i, inp in enumerate(inputs):
@@ -20,11 +20,11 @@ def hessian(output, inputs, hess=None):
 
         for j in range(inp.numel()):
             row = torch.autograd.grad(grad[j], inputs[i:], retain_graph=True)
-            row = torch.cat([x.data.contiguous().view(-1) for x in row])[j:]
+            row = torch.cat([x.detach().contiguous().view(-1) for x in row])[j:]
 
-            hess[ai, ai:] += row
+            hess[ai, ai:] += row  # ai's row
             if ai + 1 < n:
-                hess[ai + 1:, ai] += row[1:]
+                hess[ai + 1:, ai] += row[1:]  # ai's column
             del row
             ai += 1
         del grad
