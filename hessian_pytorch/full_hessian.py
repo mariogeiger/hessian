@@ -22,9 +22,9 @@ def hessian(output, inputs, hess=None):
             row = torch.autograd.grad(grad[j], inputs[i:], retain_graph=True)
             row = torch.cat([x.detach().contiguous().view(-1) for x in row])[j:]
 
-            hess[ai, ai:] += row  # ai's row
+            hess[ai, ai:] += row.type_as(hess)  # ai's row
             if ai + 1 < n:
-                hess[ai + 1:, ai] += row[1:]  # ai's column
+                hess[ai + 1:, ai] += row[1:].type_as(hess)  # ai's column
             del row
             ai += 1
         del grad
