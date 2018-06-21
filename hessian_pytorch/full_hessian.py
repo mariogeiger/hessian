@@ -19,8 +19,12 @@ def hessian(output, inputs, hess=None):
         grad = grad[0].contiguous().view(-1)
 
         for j in range(inp.numel()):
-            row = torch.autograd.grad(grad[j], inputs[i:], retain_graph=True)
-            row = torch.cat([x.detach().contiguous().view(-1) for x in row])[j:]
+            if grad[j].requires_grad:
+                row = torch.autograd.grad(grad[j], inputs[i:], retain_graph=True, allow_unused=True)
+                row = [x if x is not None else torch.zeros_like(y) for x, y in zip(row, inputs[i:])]
+                row = torch.cat([x.detach().contiguous().view(-1) for x in row])[j:]
+            else:
+                row = grad[j].new_zeros(sum(x.numel() for x in inputs[i:]) - j)
 
             hess[ai, ai:] += row.type_as(hess)  # ai's row
             if ai + 1 < n:
