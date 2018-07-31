@@ -9,6 +9,7 @@ def hessian(output, inputs, hess=None):
     '''
     Compute the Hessian of `output` with respect to `inputs`
     '''
+    inputs = list(inputs)
     n = sum(p.numel() for p in inputs)
     if hess is None:
         hess = output.new_zeros(n, n)

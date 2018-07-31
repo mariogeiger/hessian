@@ -37,6 +37,7 @@ def power_method(fun, loader, parameters, orthogonals, offset=0, target_overlap=
 
     FUN = sum of fun(batch) for batch in loader
     '''
+    parameters = list(parameters)
     vector = list_normalize([torch.rand(*p.size()) for p in parameters])
 
     if next(iter(parameters)).is_cuda:
