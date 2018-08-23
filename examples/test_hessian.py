@@ -1,4 +1,4 @@
-#pylint: disable=C, E1101
+#pylint: disable=C, E1101, E1102
 import torch
 from hessian_pytorch import hessian
 

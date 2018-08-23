@@ -12,7 +12,7 @@ def gradient(output, inputs, retain_graph=True, create_graph=False):
     return torch.cat([x.contiguous().view(-1) for x in grads])
 
 
-def hessian(output, inputs, hess=None):
+def hessian(output, inputs, hess=None, allow_unused=False, create_graph=False):
     '''
     Compute the Hessian of `output` with respect to `inputs`
     '''
@@ -23,12 +23,12 @@ def hessian(output, inputs, hess=None):
 
     ai = 0
     for i, inp in enumerate(inputs):
-        grad = torch.autograd.grad(output, inp, create_graph=True)
-        grad = grad[0].contiguous().view(-1)
+        [grad] = torch.autograd.grad(output, inp, create_graph=True, allow_unused=allow_unused)
+        grad = grad.contiguous().view(-1)
 
         for j in range(inp.numel()):
             if grad[j].requires_grad:
-                row = gradient(grad[j], inputs[i:])[j:].detach()
+                row = gradient(grad[j], inputs[i:], create_graph=create_graph)[j:]
             else:
                 row = grad[j].new_zeros(sum(x.numel() for x in inputs[i:]) - j)
 
