@@ -2,6 +2,6 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='hessian_pytorch',
+    name='hessian',
     packages=find_packages(exclude=["build"])
 )

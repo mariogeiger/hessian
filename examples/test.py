@@ -1,6 +1,6 @@
 #pylint: disable=C, E1101, E1102
 import torch
-from hessian_pytorch import hessian
+from hessian import hessian
 
 def main(device):
     x = torch.rand(4, requires_grad=True, device=device)
@@ -8,7 +8,7 @@ def main(device):
     x2 = x[2].pow(2) + x[3].pow(2)
     y = x1 * x2
 
-    h = hessian(y, [x])
+    h = hessian(y, x)
     print(h)
 
     h_exact = torch.tensor([
