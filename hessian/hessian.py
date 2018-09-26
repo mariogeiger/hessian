@@ -25,7 +25,7 @@ def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
 
         for j in range(inp.numel()):
             if grad[j].requires_grad:
-                row = gradient(grad[j], inputs[i:], create_graph=create_graph)[j:]
+                row = gradient(grad[j], inputs[i:], retain_graph=True, create_graph=create_graph)[j:]
             else:
                 row = grad[j].new_zeros(sum(x.numel() for x in inputs[i:]) - j)
 

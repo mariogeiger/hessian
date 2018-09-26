@@ -5,7 +5,7 @@ Computes the gradient
 import torch
 
 
-def gradient(output, inputs, retain_graph=True, create_graph=False):
+def gradient(output, inputs, retain_graph=None, create_graph=False):
     if torch.is_tensor(inputs):
         inputs = [inputs]
     else:
