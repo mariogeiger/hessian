@@ -4,12 +4,8 @@ Install with
 ```
 python setup.py install
 ```
-For the usage, look at the example files.
 
-
-## hessian
-The hessian is computed naively assuming the commutativity of the derivatives.
-
+## Usage
 ```python
 import torch
 from hessian import hessian
@@ -26,3 +22,5 @@ print(h2)
 # tensor([[4, 8],
 #         [8, 4]])
 ```
+
+The hessian is computed naively assuming the commutativity of the derivatives.
