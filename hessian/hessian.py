@@ -9,11 +9,16 @@ from .gradient import gradient
 def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
     '''
     Compute the Hessian of `output` with respect to `inputs`
+
+    hessian((x * y).sum(), [x, y])   
     '''
+    assert output.ndimension() == 0
+
     if torch.is_tensor(inputs):
         inputs = [inputs]
     else:
         inputs = list(inputs)
+
     n = sum(p.numel() for p in inputs)
     if out is None:
         out = output.new_zeros(n, n)
