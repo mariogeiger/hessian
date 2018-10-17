@@ -5,7 +5,7 @@ Install with
 python setup.py install
 ```
 
-## Usage
+## Compute Hessian
 ```python
 import torch
 from hessian import hessian
@@ -24,3 +24,17 @@ print(h2)
 ```
 
 The hessian is computed naively assuming the commutativity of the derivatives.
+
+## Compute Jacobian
+```python
+import torch
+from hessian import jacobian
+
+x = torch.tensor([1.5, 2.5], requires_grad=True)
+y = torch.tensor([5.5, -4.], requires_grad=True)
+j = jacobian(x.pow(y), [x, y])
+
+print(j)
+# tensor([[34.1, -0.00,  3.77,  0.00],
+#         [ 0.0, -0.04,  0.00,  0.02]])
+```
