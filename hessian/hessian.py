@@ -10,7 +10,7 @@ def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
     '''
     Compute the Hessian of `output` with respect to `inputs`
 
-    hessian((x * y).sum(), [x, y])   
+    hessian((x * y).sum(), [x, y])
     '''
     assert output.ndimension() == 0
 
@@ -26,6 +26,7 @@ def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
     ai = 0
     for i, inp in enumerate(inputs):
         [grad] = torch.autograd.grad(output, inp, create_graph=True, allow_unused=allow_unused)
+        grad = torch.zeros_like(inp) if grad is None else grad
         grad = grad.contiguous().view(-1)
 
         for j in range(inp.numel()):
