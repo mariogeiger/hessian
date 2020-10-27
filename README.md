@@ -2,7 +2,7 @@
 
 Install with
 ```
-python setup.py install
+python -m pip install git+https://github.com/mariogeiger/hessian.git
 ```
 
 ## Compute Hessian

@@ -1,4 +1,4 @@
-# pylint: disable=E1101, C0103, C0111
+# pylint: disable=no-member, line-too-long
 '''
 Computes the Hessian
 '''
@@ -7,10 +7,11 @@ from .gradient import gradient
 
 
 def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
-    '''
+    r'''
     Compute the Hessian of `output` with respect to `inputs`
-
+    ```
     hessian((x * y).sum(), [x, y])
+    ```
     '''
     assert output.ndimension() == 0
 
@@ -19,11 +20,11 @@ def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
     else:
         inputs = list(inputs)
 
-    n = sum(p.numel() for p in inputs)
+    numel = sum(p.numel() for p in inputs)
     if out is None:
-        out = output.new_zeros(n, n)
+        out = output.new_zeros(numel, numel)
 
-    ai = 0
+    row_index = 0
     for i, inp in enumerate(inputs):
         [grad] = torch.autograd.grad(output, inp, create_graph=True, allow_unused=allow_unused)
         grad = torch.zeros_like(inp) if grad is None else grad
@@ -35,11 +36,11 @@ def hessian(output, inputs, out=None, allow_unused=False, create_graph=False):
             else:
                 row = grad[j].new_zeros(sum(x.numel() for x in inputs[i:]) - j)
 
-            out[ai, ai:].add_(row.type_as(out))  # ai's row
-            if ai + 1 < n:
-                out[ai + 1:, ai].add_(row[1:].type_as(out))  # ai's column
+            out[row_index, row_index:].add_(row.type_as(out))  # row_index's row
+            if row_index + 1 < numel:
+                out[row_index + 1:, row_index].add_(row[1:].type_as(out))  # row_index's column
             del row
-            ai += 1
+            row_index += 1
         del grad
 
     return out

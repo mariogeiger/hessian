@@ -2,3 +2,5 @@
 data
 __*__
 *.egg-info
+build
+dist
